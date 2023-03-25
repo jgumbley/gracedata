@@ -2,7 +2,7 @@ import pandas as pd
 
 """Load the data from the file into a variable called 'data'"""
 
-file_path = 'your_data_file.csv'
+file_path = 'new_cases_per_million.csv'
 data = pd.read_csv(file_path)
 
 
