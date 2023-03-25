@@ -7,6 +7,8 @@ from plotly.subplots import make_subplots
 
 date_field_name = "date"
 date_format = '%Y-%m-%d'
+countries = ['Germany', 'Finland', 'United Kingdom']
+
 
 weekly_cases_file = 'weekly_cases_per_million.csv'
 weekly_deaths_file = 'weekly_deaths_per_million.csv'
@@ -29,6 +31,16 @@ weekly_cases_data.set_index(date_field_name, inplace=True)
 weekly_deaths_data.set_index(date_field_name, inplace=True)
 excess_mortality_data.set_index(date_field_name, inplace=True)
 
+
+""" Take a look at excess deaths data """
+
+
+special_list=['Germany', 'Finland', 'United Kingdom']
+excess_value="cum_excess_per_million_proj_all_ages"
+selected_countries_data = excess_mortality_data[excess_mortality_data['location'].isin(special_list)].pivot_table(values=excess_value, index='date', columns='location')
+
+print(selected_countries_data)
+
 """ Merge deaths and cases weekly data"""
 
 merged_data = weekly_cases_data.merge(weekly_deaths_data, left_index=True, right_index=True, suffixes=('_cases', '_deaths'))
@@ -41,10 +53,14 @@ countries = ['Germany', 'Finland', 'United Kingdom']
 
 colors = ['red', 'green', 'blue']
 
+# Find the minimum date in the data
 
-fig = make_subplots(rows=2, cols=1, 
-                    specs=[[{"secondary_y": False}], [{"secondary_y": False}]],
-                    subplot_titles=("Weekly Cases per Million", "Weekly Deaths per Million"))
+
+
+fig = make_subplots(rows=3, cols=1,
+                    specs=[[{"secondary_y": False}], [{"secondary_y": False}], [{"secondary_y": False}]],
+                    subplot_titles=("Weekly Cases per Million", "Weekly Deaths per Million", "Excess Mortality"))
+
 
 # Add traces for weekly cases per million
 for i, country in enumerate(countries):
@@ -60,9 +76,17 @@ for i, country in enumerate(countries):
         row=2, col=1
     )
 
+# Add traces for excess mortality
+for i, country in enumerate(countries):
+    fig.add_trace(
+        go.Scatter(x=selected_countries_data.index, y=selected_countries_data[country], name=f'{country} - Excess Mortality', line=dict(color=colors[i])),
+        row=3, col=1
+    )
+
 # Update layout and subplot titles
 fig.update_layout(title='Time Series Comparison', showlegend=True, height=800)
 
+fig.update_xaxes(range=['2020-01-01', '2023-01-01'])
 
 """Export file to browser"""
 import plotly.io as pio
