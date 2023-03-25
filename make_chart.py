@@ -28,33 +28,34 @@ merged_data = weekly_cases_data.merge(weekly_deaths_data, left_index=True, right
 
 print(merged_data)
 
-"""Select data just for our country
-   set index and print """
-
-
-selected_data = merged_data[['Finland_cases', 'Germany_cases', 'United Kingdom_cases',
-                             'Finland_deaths', 'Germany_deaths', 'United Kingdom_deaths',
-                             ]]
-print(selected_data)
-
+"""Select data just for our country"""
 """Create a plotly plot (or graph configured how we want it)"""
-
+countries = ['Germany', 'Finland', 'United_Kingdom']
 
 import plotly.graph_objs as go
-from plotly.subplots import make_subplots
 
-fig = make_subplots(specs=[[{'secondary_y': True}]])
-countries = selected_data.columns
+fig = go.Figure()
 
+# Add traces for weekly cases per million (left y-axis)
 for country in countries:
     fig.add_trace(
-        go.Scatter(x=selected_data.index, y=selected_data[country], name=country),
-        secondary_y=False
+        go.Scatter(x=merged_data.index, y=merged_data[f'{country}_cases'], name=f'{country} - Weekly Cases per Million', yaxis='y1')
     )
 
-fig.update_layout(title='Weekly COVID-19 Cases per million', showlegend=True)
+# Add traces for weekly deaths per million (right y-axis)
+for country in countries:
+    fig.add_trace(
+        go.Scatter(x=merged_data.index, y=merged_data[f'{country}_deaths'], name=f'{country} - Weekly Deaths per Million', yaxis='y2')
+    )
 
-
+# Update layout
+fig.update_layout(
+    title='Time Series Comparison',
+    xaxis=dict(title='Date'),
+    yaxis=dict(title='Weekly Cases per Million', side='left', showgrid=False),
+    yaxis2=dict(title='Weekly Deaths per Million', side='right', overlaying='y', showgrid=False),
+    legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
+)
 
 """Export file to browser"""
 import plotly.io as pio
