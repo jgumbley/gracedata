@@ -2,8 +2,11 @@ import pandas as pd
 
 """Load the data from the file into a variable called 'data'"""
 
-file_path = 'new_cases_per_million.csv'
-data = pd.read_csv(file_path)
+weekly_cases_file = 'weekly_cases_per_million.csv'
+weekly_deaths_file = 'weekly_deaths_per_million.csv'
+
+weekly_cases_data = pd.read_csv(weekly_cases_file)
+weekly_deaths_data = pd.read_csv(weekly_deaths_file)
 
 
 
@@ -11,15 +14,27 @@ data = pd.read_csv(file_path)
 """Take the timestamp of data, and convert it into a pandas timestamp """
 
 date_field_name = "date"
+date_format = '%Y-%m-%d'
 
-data[date_field_name] = pd.to_datetime(data[date_field_name], format='%Y-%m-%d')
+weekly_cases_data[date_field_name] = pd.to_datetime(weekly_cases_data[date_field_name], format=date_format)
+weekly_deaths_data[date_field_name] = pd.to_datetime(weekly_deaths_data[date_field_name], format=date_format)
 
+weekly_cases_data.set_index(date_field_name, inplace=True)
+weekly_deaths_data.set_index(date_field_name, inplace=True)
+
+""" Merge deaths and cases weekly data"""
+
+merged_data = weekly_cases_data.merge(weekly_deaths_data, left_index=True, right_index=True, suffixes=('_cases', '_deaths'))
+
+print(merged_data)
 
 """Select data just for our country
    set index and print """
 
-data.set_index(date_field_name, inplace=True)
-selected_data = data[['Finland', 'Germany', 'United Kingdom']]
+
+selected_data = merged_data[['Finland_cases', 'Germany_cases', 'United Kingdom_cases',
+                             'Finland_deaths', 'Germany_deaths', 'United Kingdom_deaths',
+                             ]]
 print(selected_data)
 
 """Create a plotly plot (or graph configured how we want it)"""
@@ -37,7 +52,7 @@ for country in countries:
         secondary_y=False
     )
 
-fig.update_layout(title='COVID-19 Cases', showlegend=True)
+fig.update_layout(title='Weekly COVID-19 Cases per million', showlegend=True)
 
 
 
