@@ -1,4 +1,7 @@
 import pandas as pd
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
+
 
 """Load the data from the file into a variable called 'data'"""
 
@@ -30,32 +33,32 @@ print(merged_data)
 
 """Select data just for our country"""
 """Create a plotly plot (or graph configured how we want it)"""
-countries = ['Germany', 'Finland', 'United_Kingdom']
+countries = ['Germany', 'Finland', 'United Kingdom']
 
-import plotly.graph_objs as go
+colors = ['red', 'green', 'blue']
 
-fig = go.Figure()
 
-# Add traces for weekly cases per million (left y-axis)
-for country in countries:
+fig = make_subplots(rows=2, cols=1, 
+                    specs=[[{"secondary_y": False}], [{"secondary_y": False}]],
+                    subplot_titles=("Weekly Cases per Million", "Weekly Deaths per Million"))
+
+# Add traces for weekly cases per million
+for i, country in enumerate(countries):
     fig.add_trace(
-        go.Scatter(x=merged_data.index, y=merged_data[f'{country}_cases'], name=f'{country} - Weekly Cases per Million', yaxis='y1')
+        go.Scatter(x=merged_data.index, y=merged_data[f'{country}_cases'], name=f'{country} - Weekly Cases per Million', line=dict(color=colors[i])),
+        row=1, col=1
     )
 
-# Add traces for weekly deaths per million (right y-axis)
-for country in countries:
+# Add traces for weekly deaths per million
+for i, country in enumerate(countries):
     fig.add_trace(
-        go.Scatter(x=merged_data.index, y=merged_data[f'{country}_deaths'], name=f'{country} - Weekly Deaths per Million', yaxis='y2')
+        go.Scatter(x=merged_data.index, y=merged_data[f'{country}_deaths'], name=f'{country} - Weekly Deaths per Million', line=dict(color=colors[i])),
+        row=2, col=1
     )
 
-# Update layout
-fig.update_layout(
-    title='Time Series Comparison',
-    xaxis=dict(title='Date'),
-    yaxis=dict(title='Weekly Cases per Million', side='left', showgrid=False),
-    yaxis2=dict(title='Weekly Deaths per Million', side='right', overlaying='y', showgrid=False),
-    legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
-)
+# Update layout and subplot titles
+fig.update_layout(title='Time Series Comparison', showlegend=True, height=800)
+
 
 """Export file to browser"""
 import plotly.io as pio
