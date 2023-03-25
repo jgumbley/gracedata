@@ -59,33 +59,35 @@ colors = ['red', 'green', 'blue']
 
 fig = make_subplots(rows=3, cols=1,
                     specs=[[{"secondary_y": False}], [{"secondary_y": False}], [{"secondary_y": False}]],
-                    subplot_titles=("Weekly Cases per Million", "Weekly Deaths per Million", "Excess Mortality"))
+                    subplot_titles=("Weekly Cases per Million", "Weekly Deaths per Million", "Excess Mortality per million"))
 
 
 # Add traces for weekly cases per million
+# Add traces for weekly cases per million
 for i, country in enumerate(countries):
     fig.add_trace(
-        go.Scatter(x=merged_data.index, y=merged_data[f'{country}_cases'], name=f'{country} - Weekly Cases per Million', line=dict(color=colors[i])),
+        go.Scatter(x=merged_data.index, y=merged_data[f'{country}_cases'], name=country, line=dict(color=colors[i])),
         row=1, col=1
     )
 
 # Add traces for weekly deaths per million
 for i, country in enumerate(countries):
     fig.add_trace(
-        go.Scatter(x=merged_data.index, y=merged_data[f'{country}_deaths'], name=f'{country} - Weekly Deaths per Million', line=dict(color=colors[i])),
+        go.Scatter(x=merged_data.index, y=merged_data[f'{country}_deaths'], showlegend=False, line=dict(color=colors[i])),
         row=2, col=1
     )
 
 # Add traces for excess mortality
 for i, country in enumerate(countries):
     fig.add_trace(
-        go.Scatter(x=selected_countries_data.index, y=selected_countries_data[country], name=f'{country} - Excess Mortality', line=dict(color=colors[i])),
+        go.Scatter(x=selected_countries_data.index, y=selected_countries_data[country], showlegend=False, line=dict(color=colors[i])),
         row=3, col=1
     )
 
 # Update layout and subplot titles
 fig.update_layout(title='Time Series Comparison', showlegend=True, height=800)
 
+#fig.update_yaxes(type='log', row=3, col=1)
 fig.update_xaxes(range=['2020-01-01', '2023-01-01'])
 
 """Export file to browser"""
