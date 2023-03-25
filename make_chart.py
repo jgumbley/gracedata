@@ -10,34 +10,40 @@ data = pd.read_csv(file_path)
 
 """Take the timestamp of data, and convert it into a pandas timestamp """
 
-data['timestamp'] = pd.to_datetime(data['timestamp'], format='%Y')
+date_field_name = "date"
+
+data[date_field_name] = pd.to_datetime(data[date_field_name], format='%Y-%m-%d')
 
 
+"""Select data just for our country
+   set index and print """
 
-"""Create a pandas 'pivot' with index timestamp and columns needed """
+data.set_index(date_field_name, inplace=True)
+selected_data = data[['Finland', 'Germany', 'United Kingdom']]
+print(selected_data)
 
-pivot_data = data.pivot(index='timestamp', columns='country', values='value')
+"""Create a plotly plot (or graph configured how we want it)"""
 
 
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
-
-"""Create a plotly plot (or graph configured how we want it)"""
 fig = make_subplots(specs=[[{'secondary_y': True}]])
-countries = pivot_data.columns
+countries = selected_data.columns
 
 for country in countries:
     fig.add_trace(
-        go.Scatter(x=pivot_data.index, y=pivot_data[country], name=country),
+        go.Scatter(x=selected_data.index, y=selected_data[country], name=country),
         secondary_y=False
     )
 
-fig.update_layout(title='Time Series Comparison', showlegend=True)
+fig.update_layout(title='COVID-19 Cases', showlegend=True)
 
-import plotly.io as pio
 
 
 """Export file to browser"""
+import plotly.io as pio
+
+
 output_file = 'time_series_chart.html'
 pio.write_html(fig, file=output_file, auto_open=True)
