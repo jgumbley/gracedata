@@ -14,11 +14,15 @@ weekly_cases_file = 'weekly_cases_per_million.csv'
 weekly_deaths_file = 'weekly_deaths_per_million.csv'
 excess_mortality_file = 'excess_mortality.csv'
 icu_occupancy_file = 'covid-hospitalizations.csv'
+tests_performed_file = 'covid-testing-all-observations.csv'
+vaccinations_file = 'vaccinations.csv'
 
 weekly_cases_data = pd.read_csv(weekly_cases_file)
 weekly_deaths_data = pd.read_csv(weekly_deaths_file)
 excess_mortality_data = pd.read_csv(excess_mortality_file)
 icu_occupancy_data = pd.read_csv(icu_occupancy_file)
+tests_performed_data = pd.read_csv(tests_performed_file)
+vaccinations_data = pd.read_csv(vaccinations_file)
 
 
 """Take the timestamp of data, and convert it into a pandas timestamp """
@@ -29,12 +33,16 @@ weekly_cases_data[date_field_name] = pd.to_datetime(weekly_cases_data[date_field
 weekly_deaths_data[date_field_name] = pd.to_datetime(weekly_deaths_data[date_field_name], format=date_format)
 excess_mortality_data[date_field_name] = pd.to_datetime(excess_mortality_data[date_field_name], format=date_format)
 icu_occupancy_data[date_field_name] = pd.to_datetime(icu_occupancy_data[date_field_name], format=date_format)
+tests_performed_data["Date"] = pd.to_datetime(tests_performed_data["Date"], format=date_format)
+vaccinations_data[date_field_name] = pd.to_datetime(vaccinations_data[date_field_name], format=date_format)
+
 
 weekly_cases_data.set_index(date_field_name, inplace=True)
 weekly_deaths_data.set_index(date_field_name, inplace=True)
 excess_mortality_data.set_index(date_field_name, inplace=True)
 icu_occupancy_data.set_index(date_field_name, inplace=True)
-
+tests_performed_data.set_index("Date", inplace=True)
+vaccinations_data.set_index(date_field_name, inplace=True)
 """ Take a look at excess deaths data """
 
 
@@ -49,6 +57,22 @@ selected_icu_occupancy_data = icu_occupancy_data[
     (icu_occupancy_data['entity'].isin(countries)) & 
     (icu_occupancy_data['indicator'] == 'Daily ICU occupancy per million')
 ].pivot_table(values='value', index='date', columns='entity')
+
+
+"""Take a look at testing data"""
+
+# Filter the data for the required countries and the indicator "7-day smoothed daily change per thousand"
+selected_tests_performed_data = tests_performed_data[
+    (tests_performed_data['Entity'].isin([f'{country} - tests performed' for country in countries])) 
+].pivot_table(values='7-day smoothed daily change per thousand', index='Date', columns='Entity')
+
+selected_tests_performed_data.columns = [col.split(' - ')[0] for col in selected_tests_performed_data.columns]
+
+
+""" This is for vaccination datas"""
+
+# Filter the data for the required countries and the indicator "daily_vaccinations_per_million"
+selected_vaccinations_data = vaccinations_data[vaccinations_data['location'].isin(countries)].pivot_table(values='daily_vaccinations_per_million', index='date', columns='location')
 
 
 """ Merge deaths and cases weekly data"""
@@ -67,10 +91,9 @@ colors = ['red', 'green', 'blue']
 
 
 
-fig = make_subplots(rows=4, cols=1,
-                    specs=[[{"secondary_y": False}], [{"secondary_y": False}], [{"secondary_y": False}], [{"secondary_y": False}]],
-                    subplot_titles=("Weekly Cases per Million", "Weekly Deaths per Million", "Excess Mortality per Million", "Daily ICU Occupancy per Million"))
-
+fig = make_subplots(rows=6, cols=1,
+                    specs=[[{"secondary_y": False}], [{"secondary_y": False}], [{"secondary_y": False}], [{"secondary_y": False}], [{"secondary_y": False}], [{"secondary_y": False}]],
+                    subplot_titles=("Weekly Cases per Million", "Weekly Deaths per Million", "Excess Mortality per million", "Daily ICU Occupancy per Million", "Tests performed per 1000", "Vaccinations"))
 
 # Add traces for weekly cases per million
 # Add traces for weekly cases per million
@@ -94,11 +117,25 @@ for i, country in enumerate(countries):
         row=3, col=1
     )
 
-# Step 4: Plot the ICU occupancy data as a time series
+# Plot the ICU occupancy data as a time series
 for i, country in enumerate(countries):
     fig.add_trace(
         go.Scatter(x=selected_icu_occupancy_data.index, y=selected_icu_occupancy_data[country], showlegend=False, line=dict(color=colors[i])),
         row=4, col=1
+    )
+
+# Plot the tests performed data as a time series
+for i, country in enumerate(countries):
+    fig.add_trace(
+        go.Scatter(x=selected_tests_performed_data.index, y=selected_tests_performed_data[country], showlegend=False, line=dict(color=colors[i])),
+        row=5, col=1
+    )
+
+# Step 4: Plot the vaccination data as a time series
+for i, country in enumerate(countries):
+    fig.add_trace(
+        go.Scatter(x=selected_vaccinations_data.index, y=selected_vaccinations_data[country], showlegend=False, line=dict(color=colors[i])),
+        row=6, col=1
     )
 
 
