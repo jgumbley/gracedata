@@ -5,25 +5,29 @@ from plotly.subplots import make_subplots
 
 """Load the data from the file into a variable called 'data'"""
 
+date_field_name = "date"
+date_format = '%Y-%m-%d'
+
 weekly_cases_file = 'weekly_cases_per_million.csv'
 weekly_deaths_file = 'weekly_deaths_per_million.csv'
+excess_mortality_file = 'excess_mortality.csv'
 
 weekly_cases_data = pd.read_csv(weekly_cases_file)
 weekly_deaths_data = pd.read_csv(weekly_deaths_file)
-
-
+excess_mortality_data = pd.read_csv(excess_mortality_file)
 
 
 """Take the timestamp of data, and convert it into a pandas timestamp """
 
-date_field_name = "date"
-date_format = '%Y-%m-%d'
+
 
 weekly_cases_data[date_field_name] = pd.to_datetime(weekly_cases_data[date_field_name], format=date_format)
 weekly_deaths_data[date_field_name] = pd.to_datetime(weekly_deaths_data[date_field_name], format=date_format)
+excess_mortality_data[date_field_name] = pd.to_datetime(excess_mortality_data[date_field_name], format=date_format)
 
 weekly_cases_data.set_index(date_field_name, inplace=True)
 weekly_deaths_data.set_index(date_field_name, inplace=True)
+excess_mortality_data.set_index(date_field_name, inplace=True)
 
 """ Merge deaths and cases weekly data"""
 
