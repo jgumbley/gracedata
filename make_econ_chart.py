@@ -1,37 +1,31 @@
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.subplots as sp
+from plotly.subplots import make_subplots
+
 
 
 
 df = pd.read_csv("data_template.csv")
 
 # Create a subplot with each indicator in its own row
-indicators = df['Indicator'].unique()
-fig = sp.make_subplots(rows=len(indicators), cols=1, shared_xaxes=True, subplot_titles=indicators)
-
+df = df.pivot_table(index='Indicator', columns='Country')
+df.columns = df.columns.droplevel(0)
 years = ['2018', '2019', '2020', '2021']
-countries = df['Country'].unique()
 
-for i, indicator in enumerate(indicators):
-    for country in countries:
-        country_data = df[(df['Indicator'] == indicator) & (df['Country'] == country)]
-        y_values = country_data[years].values[0]
+fig = make_subplots(rows=5, cols=1, shared_xaxes=True, vertical_spacing=0.1, subplot_titles=df.index)
 
+colors = {
+    'Finland': 'blue',
+    'Germany': 'red',
+    'United Kingdom': 'green'
+}
+
+for idx, (indicator, row) in enumerate(df.iterrows()):
+    for country, color in colors.items():
         fig.add_trace(
-            go.Scatter(
-                x=years,
-                y=y_values,
-                mode='lines+markers',
-                name=f"{country} - {indicator}",
-                legendgroup=country,
-                marker=dict(
-                    size=8,
-                    line=dict(width=1)
-                ),
-                line=dict(width=2),
-            ),
-            row=i + 1,
+            go.Scatter(x=years, y=row[country], name=country, legendgroup=country, showlegend=(idx == 0), line=dict(color=color)),
+            row=idx + 1,
             col=1
         )
 
@@ -44,15 +38,11 @@ fig.update_layout(
             color='darkblue'
         )
     ),
-    xaxis_title="Year",
     legend_title="Countries",
     height=1000,
     showlegend=True
 )
 
-# Update y-axis titles for each row
-for i, indicator in enumerate(indicators):
-    fig.update_yaxes(title_text=indicator, row=i + 1, col=1)
 
 # Show the figure
 fig.show()
