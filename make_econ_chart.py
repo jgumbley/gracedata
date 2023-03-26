@@ -2,7 +2,6 @@ import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
-countries=['Germany', 'Finland', 'United Kingdom']
 
 def load_and_index_on_date(filename, date_field_name="date"):
     """
