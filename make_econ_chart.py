@@ -29,6 +29,10 @@ for idx, (indicator, row) in enumerate(df.iterrows()):
             col=1
         )
 
+# Adding x-axis tick labels
+fig.update_xaxes(tickvals=years)
+
+
 fig.update_layout(
     title=dict(
         text="Comparing Economic Consequences of COVID-19 between Germany, UK, and Finland",
