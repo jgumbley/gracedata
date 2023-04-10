@@ -40,7 +40,7 @@ colors = ['red', 'green', 'blue']
 
 fig = make_subplots(rows=2, cols=1,
                     specs=[[{"secondary_y": False}], [{"secondary_y": False}] ],
-                    subplot_titles=("Weekly Deaths per Million", "Excess Mortality per million"))
+                    subplot_titles=("Weekly Deaths per million population", "Excess Mortality per million population"))
 
 
 for i, country in enumerate(countries):
